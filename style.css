@@ -19,6 +19,15 @@
   --radius-zero: 50px;
 }
 
+[data-theme="dark"] {
+  --bg: #1e2130;
+  --shadow-light: #272c40;
+  --shadow-dark: #131620;
+
+  --text-primary: #d0d8f0;
+  --text-secondary: #7a88aa;
+}
+
 /* ── Reset & Base ── */
 *,
 *::before,
@@ -35,6 +44,7 @@ body {
   justify-content: center;
   background: var(--bg);
   font-family: 'Inter', sans-serif;
+  transition: background 0.3s ease;
 }
 
 /* ── Calculator Card ── */
@@ -195,6 +205,57 @@ body {
   text-align: left;
   padding-left: 28px;
 }
+
+/* ── Theme Toggle ── */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+  transition:
+    box-shadow 0.15s ease,
+    color 0.15s ease,
+    background 0.3s ease;
+  z-index: 100;
+}
+
+.theme-toggle:hover {
+  color: var(--accent);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+
+.theme-toggle:active {
+  box-shadow:
+    inset 3px 3px 8px var(--shadow-dark),
+    inset -3px -3px 8px var(--shadow-light);
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Show sun in dark mode, moon in light mode */
+[data-theme="dark"] .icon-moon { display: none; }
+[data-theme="dark"] .icon-sun  { display: block; }
+:not([data-theme="dark"]) .icon-sun  { display: none; }
+:not([data-theme="dark"]) .icon-moon { display: block; }
 
 /* ── Responsive ── */
 @media (max-width: 400px) {
