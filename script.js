@@ -9,6 +9,12 @@ const state = {
   expressionStr: '',
 };
 
+// ── Constants ──────────────────────────────────────────────────────────────
+const MAX_PRECISION = 12;   // significant digits kept during formatting
+const MAX_INPUT_LENGTH = 12; // maximum digits the user can enter
+const SHRINK_THRESHOLD = 12; // result length that triggers small font
+const SHRINK2_THRESHOLD = 8; // result length that triggers smaller font
+
 // ── DOM refs ───────────────────────────────────────────────────────────────
 const resultEl = document.getElementById('result');
 const expressionEl = document.getElementById('expression');
@@ -20,8 +26,8 @@ function formatNumber(value) {
   const n = parseFloat(value);
   if (isNaN(n)) return 'Error';
 
-  // Limit to 12 significant digits to avoid floating-point noise
-  const str = parseFloat(n.toPrecision(12)).toString();
+  // Limit to MAX_PRECISION significant digits to avoid floating-point noise
+  const str = parseFloat(n.toPrecision(MAX_PRECISION)).toString();
   return str;
 }
 
@@ -30,8 +36,8 @@ function updateDisplay(value, expression = null) {
   resultEl.textContent = value;
   resultEl.classList.remove('shrink', 'shrink-2');
 
-  if (value.length > 12) resultEl.classList.add('shrink-2');
-  else if (value.length > 8) resultEl.classList.add('shrink');
+  if (value.length > SHRINK_THRESHOLD) resultEl.classList.add('shrink-2');
+  else if (value.length > SHRINK2_THRESHOLD) resultEl.classList.add('shrink');
 
   if (expression !== null) expressionEl.textContent = expression;
 }
@@ -61,7 +67,7 @@ function inputNumber(digit) {
     if (state.currentValue === '0' && digit !== '.') {
       state.currentValue = digit;
     } else {
-      if (state.currentValue.length >= 12) return; // max 12 digits
+      if (state.currentValue.length >= MAX_INPUT_LENGTH) return; // max digits
       state.currentValue += digit;
     }
   }
@@ -188,23 +194,27 @@ document.addEventListener('keydown', (e) => {
 
   const key = e.key;
 
-  if (key >= '0' && key <= '9')      { inputNumber(key);           return; }
-  if (key === '.')                    { inputDecimal();              return; }
-  if (key === '+')                    { chooseOperator('+');         return; }
-  if (key === '-')                    { chooseOperator('−');         return; }
-  if (key === '*')                    { chooseOperator('×');         return; }
-  if (key === '/')                    { e.preventDefault(); chooseOperator('÷'); return; }
-  if (key === 'Enter' || key === '=') { calculate();                 return; }
-  if (key === 'Escape')               { clearAll();                  return; }
-  if (key === '%')                    { applyPercent();              return; }
-  if (key === 'Backspace') {
-    if (state.currentValue.length > 1 && !state.shouldResetScreen) {
-      state.currentValue = state.currentValue.slice(0, -1) || '0';
-      updateDisplay(state.currentValue);
-    } else {
-      state.currentValue = '0';
-      updateDisplay(state.currentValue);
-    }
+  if (key >= '0' && key <= '9') { inputNumber(key); return; }
+
+  switch (key) {
+    case '.':        inputDecimal();                         break;
+    case '+':        chooseOperator('+');                    break;
+    case '-':        chooseOperator('−');                    break;
+    case '*':        chooseOperator('×');                    break;
+    case '/':        e.preventDefault(); chooseOperator('÷'); break;
+    case 'Enter':
+    case '=':        calculate();                            break;
+    case 'Escape':   clearAll();                             break;
+    case '%':        applyPercent();                         break;
+    case 'Backspace':
+      if (state.currentValue.length > 1 && !state.shouldResetScreen) {
+        state.currentValue = state.currentValue.slice(0, -1) || '0';
+        updateDisplay(state.currentValue);
+      } else {
+        state.currentValue = '0';
+        updateDisplay(state.currentValue);
+      }
+      break;
   }
 });
 
